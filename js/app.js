@@ -40,7 +40,7 @@ function roomLabelFromCode(code){
   const m = String(code).match(/^(\d{2})(\d{2})(.+)$/); // YY MM KEY
   if(!m) return code;
   const [, yy, mm, key] = m;
-
+  const courseMap = { '기초':'기초 영어회화 100', '영어':'영어회화 100', '구동':'구동사 100' };
   const course = courseMap[key] || key;
   return `${yy}년 ${mm}월 ${course} 단톡방`;
 }

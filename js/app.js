@@ -255,3 +255,10 @@ load().catch(e=>{
   console.error(e);
   document.body.insertAdjacentHTML('beforeend','<p class="muted">데이터를 불러오지 못했습니다.</p>');
 });
+
+// 과정명 변경 시 방 목록 갱신
+$('#courseSelect').addEventListener('change', ()=>{
+  const course = getSelectedCourseTitle();
+  fillRooms(course);
+  updateChartTitle(null, ($('#nickInput').value||'').trim());
+});

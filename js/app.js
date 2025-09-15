@@ -1,8 +1,10 @@
-// js/app.js — 방: select(진짜 값=opentalk_code), 닉네임: datalist, 업데이트 시각/타이틀 반영(최종본)
-let progressData = []; // study_progress.json.rows
-let certData = [];     // study_cert.json.rows (닉네임 보강용만 사용)
+// js/app.js — 과정 명 : select(진짜 값=study_group_title) - 방: select(진짜 값=opentalk_code), 닉네임: datalist, 업데이트 시각/타이틀 반영(최종본)
+// [ADD] 상태
+let progressData = [];
+let certData = [];
 let chart;
-let roomCodes = [];
+let courseTitles = []; // 과정명 목록
+let roomCodes = [];    // 현재 선택된 과정명에 속한 방 목록
 
 const $ = s => document.querySelector(s);
 const progressUrl = 'data/study_progress.json?v=' + Date.now();
@@ -56,6 +58,12 @@ function fmtDateLabel(iso){
   const dd = String(d.getDate()).padStart(2,'0');
   return `${mm}/${dd}(${w})`;
 }
+// 과정명 선택값 헬퍼
+function getSelectedCourseTitle(){
+  const sel = $('#courseSelect');
+  return sel && sel.value ? sel.value : null;
+}
+
 
 /* ========== 차트 ========== */
 function ensureChart(labels, data){
@@ -69,28 +77,54 @@ function ensureChart(labels, data){
 }
 
 /* ========== 드롭다운/목록 ========== */
-// ★ 방 목록은 progress(rows[].opentalk_code)만 사용
-function fillRooms(){
-  roomCodes = [...new Set(
-    progressData.map(r=>r.opentalk_code).filter(Boolean)
+// [NEW] 과정명 목록 채우기
+function fillCourses(){
+  courseTitles = [...new Set(
+    progressData.map(r=>String(r.study_group_title||'').trim()).filter(Boolean)
   )].sort((a,b)=>a.localeCompare(b,'ko'));
+  const sel = $("#courseSelect");
+  sel.innerHTML = '<option value="">과정 명을 선택하세요 ▼</option>';
+  courseTitles.forEach(title=>{
+    const opt = document.createElement('option');
+    opt.value = title;
+    opt.textContent = title;
+    sel.appendChild(opt);
+  });
+  // 과정 초기화 시 하위(방/닉) 비움
+  $("#roomSelect").innerHTML = '<option value="">단톡방 명을 선택하세요 ▼</option>';
+  $('#nickInput').value = '';
+  $("#nickList").innerHTML = '';
+  roomCodes = [];
+}
 
+// [CHANGED] 방 목록: 선택한 과정명으로 필터
+function fillRooms(courseTitle){
   const sel = $("#roomSelect");
   sel.innerHTML = '<option value="">단톡방 명을 선택하세요 ▼</option>';
+  if(!courseTitle){
+    roomCodes = [];
+    $('#nickInput').value = '';
+    $("#nickList").innerHTML = '';
+    return;
+  }
+  roomCodes = [...new Set(
+    progressData.filter(r=>String(r.study_group_title).trim()===courseTitle)
+                .map(r=>r.opentalk_code).filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,'ko'));
 
   roomCodes.forEach(code=>{
     const opt = document.createElement('option');
-    opt.value = code;                // 내부 값: 코드
-    opt.textContent = roomLabelFromCode(code); // 화면: 긴 이름
+    opt.value = code;
+    opt.textContent = roomLabelFromCode(code);
     sel.appendChild(opt);
   });
 
-  // 닉네임 초기화(datalist)
+  // 닉네임 초기화
   $('#nickInput').value = '';
   $("#nickList").innerHTML = '';
 }
 
-// 닉네임 목록: progress.nickname 우선 + cert.name 보강 (cert는 목록 보강만, 방엔 영향 X)
+// [UNCHANGED] 닉네임 목록(방 기준, cert 보강)
 function fillNicknames(opentalkCode){
   const ndl = $("#nickList");
   ndl.innerHTML = '';
@@ -116,8 +150,12 @@ function fillNicknames(opentalkCode){
 function updateChartTitle(code, nick){
   const el = $('#chartTitle');
   if(!el) return;
-  if(code && nick){ el.textContent = `[${roomLabelFromCode(code)}]의 ${nick}님의 진도율(%)`; }
-  else if(code){    el.textContent = `[${roomLabelFromCode(code)}]의 진도율(%)`; }
+  const course = getSelectedCourseTitle();
+  const roomTxt = code ? `[${roomLabelFromCode(code)}]` : '';
+  const courseTxt = course ? `[${course}]` : '';
+  if(code && nick){ el.textContent = `${courseTxt}${roomTxt} ${nick}님의 진도율(%)`; }
+  else if(code){    el.textContent = `${courseTxt}${roomTxt} 진도율(%)`; }
+  else if(course){  el.textContent = `${courseTxt} 진도율(%)`; }
   else{             el.textContent = '진도율(%)'; }
 }
 
@@ -142,9 +180,8 @@ function renderTable(code){
   top.forEach(r=>{
     const rank=r.user_rank??'';
     const cls = rank==1?'rank-1':rank==2?'rank-2':rank==3?'rank-3':'';
-    const displayName = (r.nickname && r.nickname.trim())
-      ? r.nickname.trim()
-      : (r.name && r.name.trim()) ? r.name.trim() : '';
+    const displayName = (r.nickname && r.nickname.trim()) ? r.nickname.trim()
+                       : (r.name && r.name.trim()) ? r.name.trim() : '';
     const avg = (r.average_week!=null && r.average_week!=='')
       ? Number.parseFloat(r.average_week).toFixed(1) : '';
     const tr=document.createElement('tr');
@@ -156,15 +193,27 @@ function renderTable(code){
 }
 
 /* ========== 이벤트 ========== */
+// [NEW] 과정명 변경 → 방 목록 갱신, 타이틀 업데이트
+$('#courseSelect').addEventListener('change', ()=>{
+  const course = getSelectedCourseTitle();
+  fillRooms(course);
+  updateChartTitle(null, ($('#nickInput').value||'').trim());
+});
+
+// 방 변경 → 닉네임 갱신, 타이틀 업데이트
 $('#roomSelect').addEventListener('change', ()=>{
   const code = getSelectedRoomCode();
   fillNicknames(code);
   updateChartTitle(code, ($('#nickInput').value||'').trim());
 });
+
+// 닉네임 입력 → 타이틀만
 $('#nickInput').addEventListener('input', ()=>{
   const code = getSelectedRoomCode();
   updateChartTitle(code, ($('#nickInput').value||'').trim());
 });
+
+// 적용 → 차트/표 렌더
 $('#applyBtn').addEventListener('click', ()=>{
   const code = getSelectedRoomCode();
   const nick = ($('#nickInput').value || '').trim();
@@ -187,7 +236,7 @@ async function load(){
   // 닉네임 보강용 cert(rows) (방 리스트에는 영향 없음)
   certData = getCertRows(cj);
 
-  fillRooms();
+  fillCourses();              // [NEW] 최상위부터 채움
   ensureChart([],[]);
   updateChartTitle(null,'');
 
@@ -198,8 +247,8 @@ async function load(){
     : '';
 
   // 방 데이터가 전혀 없을 때 안내
-  if(roomCodes.length===0){
-    $('#roomSelect').innerHTML = '<option value="">단톡방 데이터를 찾지 못했습니다</option>';
+if(courseTitles.length===0){
+    $('#courseSelect').innerHTML = '<option value="">과정 데이터를 찾지 못했습니다</option>';
   }
 }
 load().catch(e=>{

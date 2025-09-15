@@ -10,6 +10,26 @@ const $ = s => document.querySelector(s);
 const progressUrl = 'data/study_progress.json?v=' + Date.now();
 const certUrl     = 'data/study_cert.json?v=' + Date.now();
 
+// ===== 인증 코드 설정 =====
+const ACCESS_CODE = "1234";  // 원하는 코드로 변경
+
+$('#authBtn').addEventListener('click', ()=>{
+  const val = ($('#authInput').value || '').trim();
+  if(val === ACCESS_CODE){
+    // 성공 → 인증창 닫기
+    $('#authOverlay').style.display = 'none';
+  } else {
+    // 실패 → 안내
+    $('#authMsg').style.display = 'block';
+  }
+});
+
+// Enter로도 동작
+$('#authInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') $('#authBtn').click();
+});
+
+
 /* ========== 유틸 ========== */
 // progress JSON(rows 전용) 파싱
 function getProgressRows(pj){

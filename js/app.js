@@ -221,6 +221,23 @@ $('#applyBtn').addEventListener('click', ()=>{
   renderTable(code);
 });
 
+// IME(한글 조합) 중 Enter 무시용
+let isComposing = false;
+$('#nickInput').addEventListener('compositionstart', ()=> isComposing = true);
+$('#nickInput').addEventListener('compositionend', ()=> isComposing = false);
+
+// Enter로 적용 실행: 단톡방 select, 닉네임 input에서만
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Enter') return;
+  const a = document.activeElement;
+  if(!a) return;
+  if(a.id === 'roomSelect' || (a.id === 'nickInput' && !isComposing)){
+    e.preventDefault();
+    $('#applyBtn').click();
+  }
+});
+
+
 /* ========== 데이터 로드 ========== */
 async function load(){
   const [p,c] = await Promise.all([

@@ -237,6 +237,10 @@ document.addEventListener('keydown', e=>{
   }
 });
 
+$('#nickInput').addEventListener('search', ()=>{
+  // X를 눌러 값이 사라진 직후 실행됨
+  updateChartTitle(getSelectedRoomCode(), '');
+});
 
 /* ========== 데이터 로드 ========== */
 async function load(){

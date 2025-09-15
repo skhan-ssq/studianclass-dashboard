@@ -18,17 +18,30 @@
 <!-- 필터 영역 -->
 <div class="card">
   <div class="row">
+
+    <!-- [NEW] 과정명 -->
+    <div class="field">
+      <label class="muted">과정명</label>
+      <select id="courseSelect" class="input">
+        <option value="">과정 명을 선택하세요 ▼</option>
+      </select>
+    </div>
+
+    <!-- [CHANGED] 단톡방 이름 -->
     <div class="field">
       <label class="muted">단톡방 이름</label>
       <select id="roomSelect" class="input">
-        <option value="">단톡방 명을 선택하세요</option>
+        <option value="">단톡방 명을 선택하세요 ▼</option>
       </select>
     </div>
+
+    <!-- 닉네임 -->
     <div class="field">
       <label class="muted">닉네임</label>
       <input id="nickInput" class="input" list="nickList" placeholder="닉네임 선택">
       <datalist id="nickList"></datalist>
     </div>
+
     <div class="field">
       <button id="applyBtn" class="btn primary">적용</button>
     </div>

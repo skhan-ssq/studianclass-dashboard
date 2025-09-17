@@ -321,22 +321,19 @@ def _auto_resolve_ours(paths: list[str]):
         _run(f"git checkout --ours {p}", check=False)
         _run(f"git add {p}", check=False)
 
-def push_files(paths: list[str], branch: str | None = None, allow_empty: bool = True):
+def push_files(paths: list[str], branch: str | None = None, allow_empty: bool = True, remotes: list[str] | None = None):
     """
-    지정된 파일 목록을 git add/commit/push
-    - paths: 커밋할 파일 리스트
-    - allow_empty: 변경사항 없어도 빈 커밋을 생성할지 여부
-    - 원격이 더 앞서 있으면 stash→pull --rebase→(충돌 시 data/*.json ours)→push→stash pop
+    지정된 파일 목록을 git add/commit/여러 remote로 push
+    - remotes: push할 원격 리스트 (기본: ["origin"])
     """
     branch = branch or GIT_BRANCH
+    remotes = remotes or os.getenv("GIT_REMOTES", "origin").split(",")
 
-    # git 리포지토리인지 확인
     _run("git rev-parse --is-inside-work-tree")
     _ensure_branch(branch)
     _ensure_gitattributes_for_snapshots()
     _run("git config core.autocrlf false", check=False)
 
-    # 스냅샷 파일은 -f로 추가(무시 규칙에 걸려도 강제 추가)
     for p in paths:
         _run(f"git add -f {p}", check=False)
 
@@ -346,31 +343,29 @@ def push_files(paths: list[str], branch: str | None = None, allow_empty: bool = 
         commit_cmd += " --allow-empty"
     _run(commit_cmd, check=False)
 
-    # upstream 존재여부 확인(최초 push면 -u 필요)
-    up = subprocess.run("git rev-parse --abbrev-ref --symbolic-full-name @{u}", shell=True, capture_output=True, text=True)
-    first_push = (up.returncode != 0)
-
-    def do_push(use_u: bool):
-        _run(f"git push {'-u ' if use_u else ''}origin {branch}")
-
-    try:
-        do_push(first_push)
-    except RuntimeError:
-        # 원격이 더 앞서면 rebase 시도
-        _run("git stash push -u -k -m autosync", check=False)
+    for remote in [r.strip() for r in remotes if r.strip()]:
+        print(f"[INFO] pushing to {remote}/{branch}")
+        up = subprocess.run("git rev-parse --abbrev-ref --symbolic-full-name @{u}", shell=True, capture_output=True, text=True)
+        first_push = (up.returncode != 0)
+        def do_push(use_u: bool):
+            _run(f"git push {'-u ' if use_u else ''}{remote} {branch}")
         try:
-            _run(f"git pull --rebase origin {branch}")
+            do_push(first_push)
         except RuntimeError:
-            # 충돌나면 이번에 커밋하려던 파일들만 ours로 해결
-            _auto_resolve_ours(paths)
-            _run("git rebase --continue", check=False)
-        do_push(False)
-        _run("git stash pop", check=False)
+            _run("git stash push -u -k -m autosync", check=False)
+            try:
+                _run(f"git pull --rebase {remote} {branch}")
+            except RuntimeError:
+                _auto_resolve_ours(paths)
+                _run("git rebase --continue", check=False)
+            do_push(False)
+            _run("git stash pop || true", check=False)
 
-    # push 결과 간단 검증
-    local = subprocess.run("git rev-parse HEAD", shell=True, text=True, capture_output=True).stdout.strip()
-    remote = subprocess.run(f"git ls-remote origin {branch}", shell=True, text=True, capture_output=True).stdout.split("\t")[0].strip()
-    print(f"[OK] git push 완료. local={local[:7]} remote={remote[:7]}")
+        local = subprocess.run("git rev-parse HEAD", shell=True, text=True, capture_output=True).stdout.strip()
+        remote_hash = subprocess.run(f"git ls-remote {remote} {branch}", shell=True, text=True, capture_output=True).stdout.split("\t")[0].strip()
+        print(f"[OK] git push 완료. remote={remote}, local={local[:7]} remote={remote_hash[:7]}")
+
+
 
 # -----------------------------
 # 실행부
@@ -381,5 +376,5 @@ if __name__ == "__main__":
     out_files = [export_job(job) for job in JOBS]
 
     # 2) 생성된 JSON들 + db.py 푸시
-    push_files(paths=out_files + ["db.py"], branch=GIT_BRANCH, allow_empty=True)
+    push_files(paths=out_files + ["db.py"], branch=GIT_BRANCH, allow_empty=True, remotes=["origin", "Classteam"])
 

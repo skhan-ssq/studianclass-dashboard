@@ -1,2 +1,2 @@
-# [Studian_Class_dashboard](https://studianclass.github.io/Studian_Class_dashboard/)
+# [test-dashboard](https://skhan-ssq.github.io/studianclass-dashboard/)
 

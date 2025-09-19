@@ -264,23 +264,32 @@ function renderWeeklyCertChart() {
   
   if (weeklyCertChart) weeklyCertChart.destroy();
   
-  // 비율 계산 (예시: 전체 대비 비율)
-  const maxCount = Math.max(...stats.map(s => s.count));
-  const percentages = stats.map(s => maxCount > 0 ? (s.count / maxCount * 100) : 0);
+  // 각 주별 전체 활성 인원 수 계산
+  const periods = getFourWeeksPeriods();
+  const percentages = stats.map((stat, index) => {
+    const period = periods[index];
+    
+    // 해당 주 마지막 날 기준으로 활성 단톡방들의 전체 인원 수
+    const activeCodes = opentalkStartData
+      .filter(g => {
+        if (g.is_active !== 1) return false;
+        const startDate = new Date(g.opentalk_start_date);
+        const endDate = new Date(g.opentalk_end_date);
+        const periodEnd = new Date(period.end);
+        return startDate <= periodEnd && endDate >= periodEnd;
+      })
+      .map(g => g.opentalk_code);
+    
+    const totalActiveUsers = certData.filter(r => activeCodes.includes(r.opentalk_code)).length;
+    
+    return totalActiveUsers > 0 ? (stat.count / totalActiveUsers * 100) : 0;
+  });
   
   weeklyCertChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: stats.map(s => s.label),
       datasets: [
-        {
-          type: 'bar',
-          label: `${minCerts}회 이상 인증 고객 수`,
-          data: stats.map(s => s.count),
-          backgroundColor: '#10b981',
-          borderRadius: 4,
-          yAxisID: 'y'
-        },
         {
           type: 'line',
           label: '비율 (%)',
@@ -292,7 +301,17 @@ function renderWeeklyCertChart() {
           pointBorderWidth: 2,
           pointRadius: 4,
           tension: 0.3,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
+          order: 1 // 선 그래프를 앞으로
+        },
+        {
+          type: 'bar',
+          label: `${minCerts}회 이상 인증 고객 수`,
+          data: stats.map(s => s.count),
+          backgroundColor: '#10b981',
+          borderRadius: 4,
+          yAxisID: 'y',
+          order: 2 // 막대 그래프를 뒤로
         }
       ]
     },
@@ -361,23 +380,32 @@ function renderWeeklyProgressChart() {
   
   if (weeklyProgressChart) weeklyProgressChart.destroy();
   
-  // 비율 계산
-  const maxCount = Math.max(...stats.map(s => s.count));
-  const percentages = stats.map(s => maxCount > 0 ? (s.count / maxCount * 100) : 0);
+  // 각 주별 전체 활성 인원 수 계산
+  const periods = getFourWeeksPeriods();
+  const percentages = stats.map((stat, index) => {
+    const period = periods[index];
+    
+    // 해당 주 마지막 날 기준으로 활성 단톡방들의 전체 인원 수
+    const activeCodes = opentalkStartData
+      .filter(g => {
+        if (g.is_active !== 1) return false;
+        const startDate = new Date(g.opentalk_start_date);
+        const endDate = new Date(g.opentalk_end_date);
+        const periodEnd = new Date(period.end);
+        return startDate <= periodEnd && endDate >= periodEnd;
+      })
+      .map(g => g.opentalk_code);
+    
+    const totalActiveUsers = certData.filter(r => activeCodes.includes(r.opentalk_code)).length;
+    
+    return totalActiveUsers > 0 ? (stat.count / totalActiveUsers * 100) : 0;
+  });
   
   weeklyProgressChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: stats.map(s => s.label),
       datasets: [
-        {
-          type: 'bar',
-          label: '진도율 상승 고객 수',
-          data: stats.map(s => s.count),
-          backgroundColor: '#3b82f6',
-          borderRadius: 4,
-          yAxisID: 'y'
-        },
         {
           type: 'line',
           label: '비율 (%)',
@@ -389,7 +417,17 @@ function renderWeeklyProgressChart() {
           pointBorderWidth: 2,
           pointRadius: 4,
           tension: 0.3,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
+          order: 1 // 선 그래프를 앞으로
+        },
+        {
+          type: 'bar',
+          label: '진도율 상승 고객 수',
+          data: stats.map(s => s.count),
+          backgroundColor: '#3b82f6',
+          borderRadius: 4,
+          yAxisID: 'y',
+          order: 2 // 막대 그래프를 뒤로
         }
       ]
     },
@@ -446,6 +484,7 @@ function renderWeeklyProgressChart() {
     }
   });
 }
+
 
 /* =========================
  * [모듈] 전체 조회 - 4주간 데이터 계산

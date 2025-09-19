@@ -423,9 +423,26 @@
         <div class="chart-box"><canvas id="progressChart"></canvas></div>
       </div>
 
-      <!-- 달력 -->
+<!-- 달력 -->
       <div class="card">
         <h3 id="calendarCardTitle">학습 활동 달력</h3>
+        
+        <!-- 달력 상단 정보 -->
+        <div id="calendarSummary" class="calendar-summary" style="display: none;">
+          <div class="summary-item">
+            <span class="summary-label">현재 진도율:</span>
+            <span id="currentProgress" class="summary-value">-</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">총 진도율 상승:</span>
+            <span id="totalProgressGain" class="summary-value">-</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">주간 평균 인증:</span>
+            <span id="weeklyAvgCerts" class="summary-value">-</span>
+          </div>
+        </div>
+        
         <div class="calendar-container">
           <div class="calendar-header">
             <button class="calendar-nav-btn" id="prevMonthBtn">‹</button>
@@ -449,20 +466,16 @@
           <div class="calendar-legend">
             <div class="legend-item">
               <div class="legend-dot cert"></div>
-              <span>인증만</span>
+              <span>인증</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot progress"></div>
-              <span>진도만</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-dot both"></div>
-              <span>인증+진도</span>
+              <span>진도 상승 (+1 이상)</span>
             </div>
             <div id="calendarStatus" class="muted" style="margin-left: auto; font-size: 12px;"></div>
           </div>
         </div>
-      </div>
+      </div>    
 
       <!-- 인증표 -->
       <div class="card">

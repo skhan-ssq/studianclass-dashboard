@@ -77,6 +77,12 @@ JOBS: list[SnapshotJob] = [
         from_="study_user_cert_wide",
         order_by="opentalk_code, nickname"
     ),
+    SnapshotJob(
+        name="study_cert_daily",
+        select="opentalk_code, nickname, user_id, study_group_title, cert_date, cert_count",
+        from_="json_study_user_cert_daily",
+        order_by="opentalk_code, nickname, user_id, study_group_title, cert_date"
+    ),
     # 예시:
     # SnapshotJob(
     #     name="credit_cards",
@@ -275,28 +281,29 @@ def export_job(job: SnapshotJob) -> str:
 # -----------------------------
 
 def _run(cmd: str, check: bool = True, echo: bool = True):
-    """
-    셸 명령 실행 래퍼
-    - check=True: 0이 아니면 RuntimeError
-    - echo=True: 실행 커맨드 출력
-    """
     if echo:
         print(f"$ {cmd}")
     cp = subprocess.run(cmd, shell=True, text=True, capture_output=True)
-    if check and cp.returncode != 0:
-        raise RuntimeError(f"[CMD FAIL] {cmd}\n{(cp.stdout or '')}{(cp.stderr or '')}".strip())
     if cp.stdout:
         print(cp.stdout.strip())
+    if cp.stderr:
+        print(cp.stderr.strip())
+    if check and cp.returncode != 0:
+        raise RuntimeError(f"[CMD FAIL] {cmd}\n{(cp.stdout or '')}{(cp.stderr or '')}".strip())
     return cp
 
+
 def _ensure_branch(branch: str):
-    """
-    현재 브랜치를 지정 브랜치로 강제(없으면 생성/리셋)
-    """
+    # 진행 중인 머지/리베이스/충돌 인덱스 정리
+    _run("git merge --abort", check=False, echo=False)
+    _run("git rebase --abort", check=False, echo=False)
+    _run("git reset --merge", check=False, echo=False)
+
     cur = subprocess.run("git rev-parse --abbrev-ref HEAD", shell=True, text=True, capture_output=True)
     current = (cur.stdout or "").strip()
     if current != branch:
         _run(f"git checkout -B {branch}")
+
 
 def _ensure_gitattributes_for_snapshots():
     """

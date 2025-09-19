@@ -17,8 +17,24 @@
   </div>
 
   <div class="wrap">
+    
     <h1>Study Progress & Certification (ADMIN) </h1>
 
+  <!-- [전체 조회 섹션] : 나중에 기능 추가 -->
+  <div id="tabAll" style="display:none;">
+    <div class="card">
+      <h3>전체 조회</h3>
+      <p class="muted">여기에 관리자 전용 전체 데이터 테이블이나 통계가 들어갑니다.</p>
+    </div>
+  </div>
+    
+    <!-- [탭 네비게이션] 전체 조회 / 개인 조회 -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="personal">개인 조회</button>
+    <button class="tab-btn" data-tab="all">전체 조회</button>
+  </div>
+
+  <div id="tabPersonal">
     <div id="dataSource" class="muted" style="display:flex;align-items:center;justify-content:space-between;">
       <span>주 1회 업데이트</span>
       <span id="updateTime" aria-live="polite"></span>
@@ -77,6 +93,7 @@
         <tbody id="certTbody"></tbody>
       </table>
     </div>
+  </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>

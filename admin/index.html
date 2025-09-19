@@ -28,7 +28,7 @@
       grid-template-columns: repeat(7, 1fr);
     }
     
-    /* 달력 스타일 */
+/* 달력 스타일 - 완전 교체 */
     .calendar-container {
       margin-top: 20px;
       border: 1px solid #e5e7eb;
@@ -40,8 +40,9 @@
       padding: 16px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       border-bottom: 1px solid #e5e7eb;
+      gap: 30px; /* 버튼과 제목 간격 */
     }
     .calendar-nav-btn {
       background: none;
@@ -65,6 +66,8 @@
     .calendar-weekdays {
       background: #f9fafb;
       border-bottom: 1px solid #e5e7eb;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
     }
     .calendar-weekday {
       padding: 12px 8px;
@@ -72,40 +75,92 @@
       font-size: 14px;
       font-weight: 600;
       color: #6b7280;
+      border-right: 1px solid #e5e7eb;
     }
-    .calendar-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
+    .calendar-weekday:last-child {
+      border-right: none;
     }
-    .calendar-dot.cert {
-      background: #10b981; /* 인증 - 초록 */
+    #calendarDays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
     }
-    .calendar-dot.progress {
-      background: #3b82f6; /* 진도 - 파랑 */
+    .calendar-day {
+      min-height: 80px;
+      border: 1px solid #f3f4f6;
+      border-top: none;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      position: relative;
+      background: #fff;
+      font-size: 12px;
     }
-    .calendar-dot.both {
-      background: #8b5cf6; /* 둘다 - 보라 */
+    .calendar-day.other-month {
+      background: #f9fafb;
+      color: #9ca3af;
+    }
+    .calendar-day.out-of-range {
+      background: #f3f4f6;
+      color: #9ca3af;
+    }
+    .calendar-day.out-of-range .calendar-day-content {
+      opacity: 0.3;
+    }
+    .calendar-day.today {
+      background: #fef3c7;
+      border-color: #f59e0b;
+    }
+    .calendar-day-number {
+      font-size: 14px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .calendar-day-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 10px;
+      width: 100%;
+    }
+    .cert-indicator {
+      background: #10b981;
+      color: white;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 500;
+      align-self: flex-start;
+    }
+    .progress-indicator {
+      background: #3b82f6;
+      color: white;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 500;
+      align-self: flex-start;
     }
     .calendar-legend {
       padding: 16px;
       background: #f9fafb;
       border-top: 1px solid #e5e7eb;
       display: flex;
-      gap: 20px;
-      font-size: 14px;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
     }
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .legend-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-    }
+    }    
     
     /* 전체 조회 탭 스타일 */
     .dashboard-grid {
@@ -452,12 +507,12 @@
           
           <div class="calendar-legend">
             <div class="legend-item">
-              <div class="legend-dot cert"></div>
-              <span>인증</span>
+              <div class="cert-indicator" style="margin: 0;">인증</div>
+              <span>해당 날짜에 학습 인증을 완료한 경우</span>
             </div>
             <div class="legend-item">
-              <div class="legend-dot progress"></div>
-              <span>진도 상승 (+1 이상)</span>
+              <div class="progress-indicator" style="margin: 0;">+5</div>
+              <span>해당 날짜에 진도율이 1% 이상 상승한 경우 (상승량 표시)</span>
             </div>
             <div id="calendarStatus" class="muted" style="margin-left: auto; font-size: 12px;"></div>
           </div>

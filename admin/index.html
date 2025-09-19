@@ -279,6 +279,18 @@
 
     <!-- 전체 조회 탭 -->
     <div id="tabAll">
+      <!-- 상단 통계 코드 삽입 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div class="stat-card">
+            <div class="stat-number" id="totalUsersFromStart">-</div>
+            <div class="stat-label" id="totalUsersLabel">전체 단톡방 인원 수</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="activeGroupUsers">-</div>
+            <div class="stat-label">현재 운영중인 단톡방 인원 수</div>
+          </div>
+        </div>
+      
       <!-- 차트 섹션 -->
       <div class="dashboard-grid">
         <div class="stat-card">

@@ -278,155 +278,155 @@
     </div>
 
     <!-- 전체 조회 탭 -->
-    <div id="tabAll">
-      <!-- 상단 통계 코드 삽입 -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-          <div class="stat-card">
-            <div class="stat-number" id="totalUsersFromStart">-</div>
-            <div class="stat-label" id="totalUsersLabel">전체 단톡방 인원 수</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" id="activeGroupUsers">-</div>
-            <div class="stat-label">현재 운영중인 단톡방 인원 수</div>
-          </div>
-        </div>
+<div id="tabAll">
+  <!-- 상단 통계 -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+    <div class="stat-card">
+      <div class="stat-number" id="totalUsersFromStart">-</div>
+      <div class="stat-label" id="totalUsersLabel">전체 단톡방 인원 수</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="activeGroupUsers">-</div>
+      <div class="stat-label">현재 운영중인 단톡방 인원 수</div>
+    </div>
+  </div>
+
+  <!-- 차트 섹션 -->
+  <div class="dashboard-grid">
+    <div class="stat-card">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span class="stat-label">최소 인증 횟수:</span>
+        <input type="number" id="minCertCount" value="3" min="1" max="20" style="width: 60px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 4px;">
+      </div>
+      <div class="chart-container">
+        <canvas id="weeklyCertChart"></canvas>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">진도율 상승 고객 수 (최근 4주)</div>
+      <div class="chart-container">
+        <canvas id="weeklyProgressChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 과정별/단톡방별 조회 섹션 -->
+  <div class="card">
+    <div class="section-tabs">
+      <button class="section-tab active" data-section="course">과정별 조회</button>
+      <button class="section-tab" data-section="room">단톡방 조회</button>
+    </div>
+
+    <!-- 과정별 조회 -->
+    <div id="sectionCourse" class="filter-section active">
+      <div class="tab-content-filters">
+        <select id="allCourseSelect" class="filter-input">
+          <option value="">전체 과정</option>
+        </select>
+        <button id="applyCourseFilter" class="btn primary">조회</button>
+      </div>
       
-      <!-- 차트 섹션 -->
-      <div class="dashboard-grid">
-        <div class="stat-card">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <span class="stat-label">최소 인증 횟수:</span>
-            <input type="number" id="minCertCount" value="3" min="1" max="20" style="width: 60px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 4px;">
-          </div>
-          <div class="chart-container">
-            <canvas id="weeklyCertChart"></canvas>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">진도율 상승 고객 수 (최근 4주)</div>
-          <div class="chart-container">
-            <canvas id="weeklyProgressChart"></canvas>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <h4>인증 고객 (4주 평균 기준)</h4>
+          <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr><th>단톡방</th><th>고객명</th><th>평균 인증수</th></tr>
+              </thead>
+              <tbody id="courseCertTable"></tbody>
+            </table>
           </div>
         </div>
-      </div>
-
-      <!-- 과정별/단톡방별 조회 섹션 -->
-      <div class="card">
-        <div class="section-tabs">
-          <button class="section-tab active" data-section="course">과정별 조회</button>
-          <button class="section-tab" data-section="room">단톡방 조회</button>
-        </div>
-
-        <!-- 과정별 조회 -->
-        <div id="sectionCourse" class="filter-section active">
-          <div class="tab-content-filters">
-            <select id="allCourseSelect" class="filter-input">
-              <option value="">전체 과정</option>
-            </select>
-            <button id="applyCourseFilter" class="btn primary">조회</button>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-              <h4>인증 고객 (4주 평균 기준)</h4>
-              <div style="max-height: 400px; overflow-y: auto;">
-                <table>
-                  <thead>
-                    <tr><th>단톡방</th><th>고객명</th><th>평균 인증수</th></tr>
-                  </thead>
-                  <tbody id="courseCertTable"></tbody>
-                </table>
-              </div>
-            </div>
-            <div>
-              <h4>진도율 상승 고객 (4주 기준)</h4>
-              <div style="max-height: 400px; overflow-y: auto;">
-                <table>
-                  <thead>
-                    <tr><th>단톡방</th><th>고객명</th><th>현재 진도율</th><th>상승폭</th></tr>
-                  </thead>
-                  <tbody id="courseProgressTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 단톡방별 조회 -->
-        <div id="sectionRoom" class="filter-section">
-          <div class="tab-content-filters">
-            <select id="allCourseSelectForRoom" class="filter-input">
-              <option value="">과정 선택</option>
-            </select>
-            <select id="allRoomSelect" class="filter-input">
-              <option value="">단톡방 선택</option>
-            </select>
-            <button id="applyRoomFilter" class="btn primary">조회</button>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-              <h4>인증 고객 (4주 평균 기준)</h4>
-              <div style="max-height: 400px; overflow-y: auto;">
-                <table>
-                  <thead>
-                    <tr><th>고객명</th><th>평균 인증수</th></tr>
-                  </thead>
-                  <tbody id="roomCertTable"></tbody>
-                </table>
-              </div>
-            </div>
-            <div>
-              <h4>진도율 상승 고객 (4주 기준)</h4>
-              <div style="max-height: 400px; overflow-y: auto;">
-                <table>
-                  <thead>
-                    <tr><th>고객명</th><th>현재 진도율</th><th>상승폭</th></tr>
-                  </thead>
-                  <tbody id="roomProgressTable"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 기간 조회 -->
-      <div class="card">
-        <h3>기간 조회</h3>
-        <div class="search-filters">
-          <label>조회 시작일: <input type="date" id="periodStartDate" class="filter-input"></label>
-          <label>조회 종료일: <input type="date" id="periodEndDate" class="filter-input"></label>
-          <button id="applyPeriodFilter" class="btn primary">조회</button>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-          <div>
-            <h4>인증 현황 (기간 내 주간 평균)</h4>
-            <div style="max-height: 400px; overflow-y: auto;">
-              <table>
-                <thead>
-                  <tr><th>단톡방</th><th>고객명</th><th>주간 평균 인증수</th></tr>
-                </thead>
-                <tbody id="periodCertTable"></tbody>
-              </table>
-            </div>
-          </div>
-          <div>
-            <h4>진도율 현황 (기간 내 상승)</h4>
-            <div style="max-height: 400px; overflow-y: auto;">
-              <table>
-                <thead>
-                  <tr><th>단톡방</th><th>고객명</th><th>현재 진도율</th><th>상승폭</th></tr>
-                </thead>
-                <tbody id="periodProgressTable"></tbody>
-              </table>
-            </div>
+        <div>
+          <h4>진도율 상승 고객 (4주 기준)</h4>
+          <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr><th>단톡방</th><th>고객명</th><th>현재 진도율</th><th>상승폭</th></tr>
+              </thead>
+              <tbody id="courseProgressTable"></tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- 단톡방별 조회 -->
+    <div id="sectionRoom" class="filter-section">
+      <div class="tab-content-filters">
+        <select id="allCourseSelectForRoom" class="filter-input">
+          <option value="">과정 선택</option>
+        </select>
+        <select id="allRoomSelect" class="filter-input">
+          <option value="">단톡방 선택</option>
+        </select>
+        <button id="applyRoomFilter" class="btn primary">조회</button>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <h4>인증 고객 (4주 평균 기준)</h4>
+          <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr><th>고객명</th><th>평균 인증수</th></tr>
+              </thead>
+              <tbody id="roomCertTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4>진도율 상승 고객 (4주 기준)</h4>
+          <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr><th>고객명</th><th>현재 진도율</th><th>상승폭</th></tr>
+              </thead>
+              <tbody id="roomProgressTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기간 조회 -->
+  <div class="card">
+    <h3>기간 조회</h3>
+    <div class="search-filters">
+      <label>조회 시작일: <input type="date" id="periodStartDate" class="filter-input"></label>
+      <label>조회 종료일: <input type="date" id="periodEndDate" class="filter-input"></label>
+      <button id="applyPeriodFilter" class="btn primary">조회</button>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+      <div>
+        <h4>인증 현황 (기간 내 주간 평균)</h4>
+        <div style="max-height: 400px; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr><th>단톡방</th><th>고객명</th><th>주간 평균 인증수</th></tr>
+            </thead>
+            <tbody id="periodCertTable"></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h4>진도율 현황 (기간 내 상승)</h4>
+        <div style="max-height: 400px; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr><th>단톡방</th><th>고객명</th><th>현재 진도율</th><th>상승폭</th></tr>
+            </thead>
+            <tbody id="periodProgressTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
     <!-- 개인 조회 탭 -->
     <div id="tabPersonal" style="display:none;">
       <!-- 기존 필터 -->

@@ -76,11 +76,7 @@ function computeShownAt(pj, rows) {
 }
 
 function roomLabelFromCode(code) {
-  if (!code) return '';
-  const m = String(code).match(/^(\d{2})(\d{2})(.+)$/);
-  if (!m) return code;
-  const [, yy, mm] = m;
-  return `${yy}년 ${mm}월 단톡방`;
+  return code || '';  // 단톡방 코드 그대로 반환
 }
 
 function getSelectedRoomCode() {
@@ -338,43 +334,51 @@ function renderWeeklyProgressChart() {
  * ========================= */
 
 /** 
- * 4주간 평균 인증 수 계산 (단톡방 시작일 고려)
+ * 4주간 평균 인증 수 계산 (단톡방 시작일 고려, 일일 최대 1회)
  * @param {string} opentalkCode 
  * @param {string} nickname 
  */
 function calculate4WeekAvgCerts(opentalkCode, nickname) {
   const today = new Date();
-  const fourWeeksAgo = new Date(today);
-  fourWeeksAgo.setDate(today.getDate() - 28);
-  
-  // 단톡방 시작일 확인
   const groupInfo = opentalkStartData.find(g => g.opentalk_code === opentalkCode);
-  let startDate = fourWeeksAgo;
   
-  if (groupInfo) {
-    const groupStartDate = new Date(groupInfo.opentalk_start_date);
-    if (groupStartDate > fourWeeksAgo) {
-      startDate = groupStartDate;
+  if (!groupInfo) return 0;
+  
+  const startDate = new Date(groupInfo.opentalk_start_date);
+  const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
+  
+  // 최근 4주간 각 주차별 인증일수 계산
+  const weeklyDays = [];
+  for (let week = 0; week < 4; week++) {
+    const weekEndDay = daysSinceStart - (week * 7);
+    const weekStartDay = weekEndDay - 6;
+    
+    if (weekStartDay <= 0) {
+      weeklyDays.push(0);
+      continue;
     }
+    
+    const weekStart = new Date(startDate);
+    weekStart.setDate(startDate.getDate() + weekStartDay - 1);
+    const weekEnd = new Date(startDate);
+    weekEnd.setDate(startDate.getDate() + weekEndDay - 1);
+    
+    // 해당 주에 인증한 고유 날짜 수 (일일 최대 1회)
+    const certDays = [...new Set(
+      certDailyData
+        .filter(r => r.opentalk_code === opentalkCode && 
+                     (r.nickname || r.name) === nickname &&
+                     r.cert_date >= weekStart.toISOString().slice(0,10) &&
+                     r.cert_date <= weekEnd.toISOString().slice(0,10) &&
+                     r.cert_count > 0)
+        .map(r => r.cert_date)
+    )].length;
+    
+    weeklyDays.push(certDays);
   }
   
-  // 해당 기간의 인증 데이터
-  const userCerts = certDailyData.filter(r => 
-    r.opentalk_code === opentalkCode &&
-    (r.nickname || r.name) === nickname &&
-    r.cert_date >= startDate.toISOString().slice(0, 10) &&
-    r.cert_date <= today.toISOString().slice(0, 10)
-  );
-  
-  // 총 인증 횟수
-  const totalCerts = userCerts.reduce((sum, r) => sum + (r.cert_count || 0), 0);
-  
-  // 실제 경과 일수
-  const daysDiff = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
-  const actualDays = Math.min(daysDiff, 28);
-  
-  // 평균 = 총 인증 횟수 / 28일 (또는 실제 경과 일수)
-  return actualDays > 0 ? totalCerts / actualDays * 7 : 0; // 주간 평균으로 환산
+  // 4주 평균 인증일수
+  return weeklyDays.reduce((sum, days) => sum + days, 0) / 4;
 }
 
 /** 
@@ -628,21 +632,21 @@ function renderRoomProgressTable(opentalkCode) {
  * ========================= */
 
 /** 
- * 기간별 평균 인증 수 계산
+ * 기간별 인증일수 계산 (일일 최대 1회)
  */
 function calculatePeriodAvgCerts(opentalkCode, nickname, startDate, endDate) {
-  const userCerts = certDailyData.filter(r => 
-    r.opentalk_code === opentalkCode &&
-    (r.nickname || r.name) === nickname &&
-    r.cert_date >= startDate &&
-    r.cert_date <= endDate
-  );
+  // 기간내 인증한 고유 날짜 수
+  const certDays = [...new Set(
+    certDailyData
+      .filter(r => r.opentalk_code === opentalkCode &&
+                   (r.nickname || r.name) === nickname &&
+                   r.cert_date >= startDate &&
+                   r.cert_date <= endDate &&
+                   r.cert_count > 0)
+      .map(r => r.cert_date)
+  )].length;
   
-  const totalCerts = userCerts.reduce((sum, r) => sum + (r.cert_count || 0), 0);
-  const daysDiff = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
-  const weeksDiff = daysDiff / 7;
-  
-  return weeksDiff > 0 ? totalCerts / weeksDiff : 0;
+  return certDays;
 }
 
 /** 

@@ -154,10 +154,10 @@ function getFourWeeksPeriods() {
   
   for (let week = 3; week >= 0; week--) {
     const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - (week * 7) - 6); // 주 시작 (일요일)
+    weekStart.setDate(today.getDate() - (week * 7) - (today.getDay() === 0 ? 6 : today.getDay() - 1)); // 월요일 시작
     
-    const weekEnd = new Date(today);
-    weekEnd.setDate(today.getDate() - (week * 7)); // 주 끝 (토요일)
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6); // 일요일 종료
     
     periods.push({
       start: weekStart.toISOString().slice(0, 10),

@@ -349,12 +349,50 @@ async function load() {
  * ========================= */
 async function init() {
   try {
-    initAuthOverlay();
-    bindEvents();
-    await load();
+    initAuthOverlay(); // 인증 오버레이 초기화
+    bindEvents();      // 기존 필터/버튼 이벤트 연결
+    await load();      // 데이터 로드 및 초기 렌더
+
+    initTabs();        // [ADD] 탭 전환 초기화(섹션 show/hide 세팅)
   } catch (e) {
     console.error(e);
     showLoadError('데이터를 불러오지 못했습니다.');
   }
 }
 init();
+
+
+/* =========================
+ * [탭 전환 모듈]
+ * - 상단 탭 버튼(개인/전체) 클릭 시 섹션 전환
+ * - 요구 DOM:
+ *   .tab-btn[data-tab="personal"|"all"], #tabPersonal, #tabAll
+ * ========================= */
+/**
+ * initTabs
+ * 탭 버튼에 클릭 리스너를 연결하고 섹션 표시를 토글한다.
+ * @effects
+ *  - .tab-btn의 active 클래스 토글
+ *  - #tabPersonal, #tabAll의 display 전환
+ */
+function initTabs(){
+  const buttons = document.querySelectorAll('.tab-btn');
+  if(!buttons.length) return; // 탭 UI가 없으면 무시
+
+  buttons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      // 1) active 클래스 토글
+      buttons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // 2) 섹션 표시 전환
+      const target = btn.dataset.tab; // 'personal' | 'all'
+      const showPersonal = (target === 'personal');
+      const personal = document.getElementById('tabPersonal');
+      const all = document.getElementById('tabAll');
+      if(personal) personal.style.display = showPersonal ? 'block' : 'none';
+      if(all) all.style.display = showPersonal ? 'none' : 'block';
+    });
+  });
+}
+

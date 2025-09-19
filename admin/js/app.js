@@ -873,6 +873,7 @@ function renderCalendar() {
   
   // 단톡방 정보 업데이트
   updateCalendarStatus();
+  updateCalendarSummary();
   
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -904,20 +905,21 @@ function renderCalendar() {
     const isInRange = code ? isDateInRange(dateStr, code) : false;
     const isOutOfRange = code && !isInRange;
     
-    let indicators = '';
-    if (!isOutOfRange && activity.cert && activity.progress) {
-      indicators = '<div class="calendar-dot both"></div>';
-    } else if (!isOutOfRange && activity.cert) {
-      indicators = '<div class="calendar-dot cert"></div>';
-    } else if (!isOutOfRange && activity.progress) {
-      indicators = '<div class="calendar-dot progress"></div>';
+    let content = '';
+    if (!isOutOfRange) {
+      if (activity.cert) {
+        content += '<div class="cert-indicator">인증</div>';
+      }
+      if (activity.progress && activity.progressGain > 0) {
+        content += `<div class="progress-indicator">+${activity.progressGain}</div>`;
+      }
     }
     
     const outOfRangeClass = isOutOfRange ? 'out-of-range' : '';
     
     calendarHTML += `<div class="calendar-day ${isToday ? 'today' : ''} ${outOfRangeClass}">
       <div class="calendar-day-number">${date}</div>
-      <div class="calendar-indicators">${indicators}</div>
+      <div class="calendar-day-content">${content}</div>
     </div>`;
     
     date++;
@@ -964,8 +966,51 @@ function updateCalendarStatus() {
   $('#calendarCardTitle').textContent = cardTitle;
 }
 
+function updateCalendarSummary() {
+  const code = getSelectedRoomCode();
+  const nick = ($('#nickInput').value || '').trim();
+  const summaryDiv = $('#calendarSummary');
+  
+  if (!code || !nick) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+  
+  summaryDiv.style.display = 'flex';
+  
+  // 현재 진도율 (최신 데이터)
+  const userProgress = progressData
+    .filter(r => r.opentalk_code === code && (r.nickname || '').trim() === nick)
+    .sort((a, b) => b.progress_date.localeCompare(a.progress_date));
+  
+  const currentProgress = userProgress.length > 0 ? Math.round(parseFloat(userProgress[0].progress)) : 0;
+  $('#currentProgress').textContent = `${currentProgress}%`;
+  
+  // 총 진도율 상승 (단톡방 시작일부터)
+  const groupInfo = opentalkStartData.find(g => g.opentalk_code === code);
+  let totalGain = 0;
+  
+  if (groupInfo && userProgress.length > 0) {
+    const startDate = groupInfo.opentalk_start_date;
+    const startProgress = userProgress
+      .filter(r => r.progress_date >= startDate)
+      .sort((a, b) => a.progress_date.localeCompare(b.progress_date))[0];
+    
+    if (startProgress) {
+      const initialProgress = parseFloat(startProgress.progress);
+      totalGain = Math.max(0, Math.round(currentProgress - initialProgress));
+    }
+  }
+  
+  $('#totalProgressGain').textContent = totalGain > 0 ? `+${totalGain}` : '0';
+  
+  // 주간 평균 인증 수 (4주 기준)
+  const weeklyAvg = calculate4WeekAvgCerts(code, nick);
+  $('#weeklyAvgCerts').textContent = `${weeklyAvg.toFixed(1)}회`;
+}
+
 function getUserActivity(dateStr) {
-  if (!selectedUserData) return { cert: false, progress: false };
+  if (!selectedUserData) return { cert: false, progress: false, progressGain: 0 };
   
   const code = getSelectedRoomCode();
   const nick = ($('#nickInput').value || '').trim();
@@ -978,15 +1023,28 @@ function getUserActivity(dateStr) {
     r.cert_count > 0
   );
   
-  // 진도 확인
-  const hasProgress = progressData.some(r => 
-    r.opentalk_code === code && 
-    (r.nickname || '').trim() === nick &&
-    r.progress_date === dateStr &&
-    parseFloat(r.progress) > 0
-  );
+  // 진도율 상승 확인
+  const userProgress = progressData
+    .filter(r => r.opentalk_code === code && (r.nickname || '').trim() === nick)
+    .sort((a, b) => a.progress_date.localeCompare(b.progress_date));
   
-  return { cert: hasCert, progress: hasProgress };
+  const currentDateProgress = userProgress.find(r => r.progress_date === dateStr);
+  let progressGain = 0;
+  
+  if (currentDateProgress) {
+    // 이전 날짜의 진도율 찾기
+    const currentIndex = userProgress.findIndex(r => r.progress_date === dateStr);
+    if (currentIndex > 0) {
+      const prevProgress = parseFloat(userProgress[currentIndex - 1].progress);
+      const currentProgress = parseFloat(currentDateProgress.progress);
+      const gain = currentProgress - prevProgress;
+      if (gain >= 1) {
+        progressGain = gain;
+      }
+    }
+  }
+  
+  return { cert: hasCert, progress: progressGain > 0, progressGain: Math.round(progressGain) };
 }
 
 /* =========================

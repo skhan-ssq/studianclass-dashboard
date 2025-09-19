@@ -9,84 +9,77 @@
 <body>
 
   <!-- 입장 인증 -->
-<div id="authOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;
-    background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
-  <h2>코드 입력</h2>
-  <input id="authInput" type="password" placeholder="코드 입력" style="padding:8px;font-size:16px;">
-  <button id="authBtn" style="margin-top:10px;padding:6px 12px;">확인</button>
-  <p id="authMsg" style="color:red;display:none;">코드가 올바르지 않습니다.</p>
-</div>
-
-  
-<div class="wrap">
-<h1>Study Progress & Certification</h1>
-<div id="dataSource" class="muted" style="display:flex;align-items:center;justify-content:space-between;">
-  <span>주 1회 업데이트</span>
-  <span id="updateTime"></span>
-</div>
-
- 
-<!-- 필터 영역 -->
-<div class="card">
-  <div class="row">
-
-    <!-- [NEW] 과정명 -->
-    <div class="field">
-      <label class="muted">과정명</label>
-      <select id="courseSelect" class="input">
-        <option value="">과정 명을 선택하세요 ▼</option>
-      </select>
-    </div>
-
-    <!-- [CHANGED] 단톡방 이름 -->
-    <div class="field">
-      <label class="muted">단톡방 이름</label>
-      <select id="roomSelect" class="input">
-        <option value="">단톡방 명을 선택하세요 ▼</option>
-      </select>
-    </div>
-
-    <!-- 닉네임 -->
-    <div class="field">
-      <label class="muted">닉네임</label>
-      <input id="nickInput"  type="search" class="input" list="nickList" placeholder="닉네임 선택">
-      <datalist id="nickList"></datalist>
-    </div>
-
-    <div class="field">
-      <button id="applyBtn" class="btn primary">적용</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- 필터 박스 바로 아래 안내문 -->
-<p id="helpNote" class="muted" style="margin:5px 0 11px 0;">* 조회가 안되시는 분은<br>
-  1. 닉네임 시트의 닉네임을 쓰시고 계시는지, <br>
-  2. 닉네임 시트의 이메일과 스터디언 클래스 계정의 이메일이 일치하는지 확인해주세요:)<br>
-  ※ 문의 : <a href="https://studianclass.channel.io" target="_blank" rel="noopener noreferrer">studianclass.channel.io</a><br>
-  </p>
-  <!-- 차트 -->
-  <div class="card">
-    <h3 id="chartTitle">진도율(%)</h3>
-    <div class="chart-box"><canvas id="progressChart"></canvas></div>
+  <div id="authOverlay" role="dialog" aria-modal="true" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+    <h2>코드 입력</h2>
+    <input id="authInput" type="password" placeholder="코드 입력" style="padding:8px;font-size:16px;" aria-label="접속 코드 입력">
+    <button id="authBtn" type="button" style="margin-top:10px;padding:6px 12px;">확인</button>
+    <p id="authMsg" style="color:red;display:none;" aria-live="polite">코드가 올바르지 않습니다.</p>
   </div>
 
-  <!-- 인증 표 -->
-  <div class="card">
-    <h3>인증 현황 (상위 20명)</h3>
-    <div class="muted" id="certCount"></div>
-    <table>
-      <thead>
-        <tr><th>순위</th><th>이름</th><th>인증일수</th><th>주간 평균</th></tr>
-      </thead>
-      <tbody id="certTbody"></tbody>
-    </table>
-  </div>
-</div>
+  <div class="wrap">
+    <h1>Study Progress & Certification</h1>
 
-<!-- 스크립트 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="js/app.js"></script>
+    <div id="dataSource" class="muted" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>주 1회 업데이트</span>
+      <span id="updateTime" aria-live="polite"></span>
+    </div>
+
+    <!-- 로드 에러 영역(동적 표시) -->
+    <div id="loadError" class="muted" style="display:none;margin:8px 0;" aria-live="polite"></div>
+
+    <!-- 필터 영역 -->
+    <div class="card">
+      <div class="row">
+        <div class="field">
+          <label class="muted" for="courseSelect">과정명</label>
+          <select id="courseSelect" class="input">
+            <option value="">과정 명을 선택하세요 ▼</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="muted" for="roomSelect">단톡방 이름</label>
+          <select id="roomSelect" class="input">
+            <option value="">단톡방 명을 선택하세요 ▼</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="muted" for="nickInput">닉네임</label>
+          <input id="nickInput" type="search" class="input" list="nickList" placeholder="닉네임 선택">
+          <datalist id="nickList"></datalist>
+        </div>
+
+        <div class="field">
+          <button id="applyBtn" type="button" class="btn primary">적용</button>
+        </div>
+      </div>
+    </div>
+
+    <p id="helpNote" class="muted" style="margin:5px 0 11px 0;">* 조회가 안되시는 분은<br>
+      1. 닉네임 시트의 닉네임을 쓰시고 계시는지, <br>
+      2. 닉네임 시트의 이메일과 스터디언 클래스 계정의 이메일이 일치하는지 확인해주세요:)<br>
+      ※ 문의 : <a href="https://studianclass.channel.io" target="_blank" rel="noopener noreferrer">studianclass.channel.io</a><br>
+    </p>
+
+    <div class="card">
+      <h3 id="chartTitle">진도율(%)</h3>
+      <div class="chart-box"><canvas id="progressChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>인증 현황 (상위 20명)</h3>
+      <div class="muted" id="certCount"></div>
+      <table>
+        <thead>
+          <tr><th>순위</th><th>이름</th><th>인증일수</th><th>주간 평균</th></tr>
+        </thead>
+        <tbody id="certTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

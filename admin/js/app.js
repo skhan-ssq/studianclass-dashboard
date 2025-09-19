@@ -264,27 +264,86 @@ function renderWeeklyCertChart() {
   
   if (weeklyCertChart) weeklyCertChart.destroy();
   
+  // 비율 계산 (예시: 전체 대비 비율)
+  const maxCount = Math.max(...stats.map(s => s.count));
+  const percentages = stats.map(s => maxCount > 0 ? (s.count / maxCount * 100) : 0);
+  
   weeklyCertChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: stats.map(s => s.label),
-      datasets: [{
-        label: `${minCerts}회 이상 인증 고객 수`,
-        data: stats.map(s => s.count),
-        backgroundColor: '#10b981',
-        borderRadius: 4
-      }]
+      datasets: [
+        {
+          type: 'bar',
+          label: `${minCerts}회 이상 인증 고객 수`,
+          data: stats.map(s => s.count),
+          backgroundColor: '#10b981',
+          borderRadius: 4,
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: '비율 (%)',
+          data: percentages,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          pointBackgroundColor: '#f59e0b',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          tension: 0.3,
+          yAxisID: 'y1'
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
       plugins: {
-        legend: { display: false }
+        legend: { 
+          display: true,
+          position: 'top'
+        }
       },
       scales: {
+        x: {
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
         y: { 
+          type: 'linear',
+          display: true,
+          position: 'left',
           beginAtZero: true,
-          ticks: { stepSize: 1 }
+          ticks: { stepSize: 1 },
+          title: {
+            display: true,
+            text: '고객 수'
+          }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          beginAtZero: true,
+          max: 100,
+          grid: {
+            drawOnChartArea: false,
+          },
+          title: {
+            display: true,
+            text: '비율 (%)'
+          },
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          }
         }
       }
     }
@@ -302,27 +361,86 @@ function renderWeeklyProgressChart() {
   
   if (weeklyProgressChart) weeklyProgressChart.destroy();
   
+  // 비율 계산
+  const maxCount = Math.max(...stats.map(s => s.count));
+  const percentages = stats.map(s => maxCount > 0 ? (s.count / maxCount * 100) : 0);
+  
   weeklyProgressChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: stats.map(s => s.label),
-      datasets: [{
-        label: '진도율 상승 고객 수',
-        data: stats.map(s => s.count),
-        backgroundColor: '#3b82f6',
-        borderRadius: 4
-      }]
+      datasets: [
+        {
+          type: 'bar',
+          label: '진도율 상승 고객 수',
+          data: stats.map(s => s.count),
+          backgroundColor: '#3b82f6',
+          borderRadius: 4,
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: '비율 (%)',
+          data: percentages,
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          pointBackgroundColor: '#ef4444',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          tension: 0.3,
+          yAxisID: 'y1'
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
       plugins: {
-        legend: { display: false }
+        legend: { 
+          display: true,
+          position: 'top'
+        }
       },
       scales: {
+        x: {
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
         y: { 
+          type: 'linear',
+          display: true,
+          position: 'left',
           beginAtZero: true,
-          ticks: { stepSize: 1 }
+          ticks: { stepSize: 1 },
+          title: {
+            display: true,
+            text: '고객 수'
+          }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          beginAtZero: true,
+          max: 100,
+          grid: {
+            drawOnChartArea: false,
+          },
+          title: {
+            display: true,
+            text: '비율 (%)'
+          },
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          }
         }
       }
     }

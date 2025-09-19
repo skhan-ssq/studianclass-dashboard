@@ -12,8 +12,8 @@
 /** 배포 시 바꾸는 정적 캐시 키(주 1회 업데이트 정책에 맞춤) */
 const BUILD_VERSION = '2025-09-19';
 /** 데이터 경로(고정 버전 파라미터 사용) */
-const progressUrl = `data/study_progress.json?v=${BUILD_VERSION}`;
-const certUrl = `data/study_cert.json?v=${BUILD_VERSION}`;
+const progressUrl = `../data/study_progress.json?v=${BUILD_VERSION}`;
+const certUrl = `../data/study_cert.json?v=${BUILD_VERSION}`;
 /** 인증 코드(클라이언트 하드코딩은 보안 아님! 서버 검증 권장) */
 const ACCESS_CODE = '1234';
 

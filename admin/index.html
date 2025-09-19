@@ -83,6 +83,7 @@
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       overflow: hidden;
+      width: 100%;
     }
     .calendar-header {
       background: #f9fafb;
@@ -109,14 +110,15 @@
       font-weight: 600;
     }
     .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      display: block;
+      width: 100%;
     }
     .calendar-weekdays {
       background: #f9fafb;
       border-bottom: 1px solid #e5e7eb;
       display: grid;
       grid-template-columns: repeat(7, 1fr);
+      width: 100%;
     }
     .calendar-weekday {
       padding: 12px 8px;
@@ -132,12 +134,14 @@
     #calendarDays {
       display: grid !important;
       grid-template-columns: repeat(7, 1fr) !important;
+      width: 100% !important;
+      gap: 0 !important;
     }
     .calendar-day {
       min-height: 80px !important;
       border: 1px solid #f3f4f6 !important;
       border-top: none !important;
-      padding: 6px !important;
+      padding: 8px !important;
       display: flex !important;
       flex-direction: column !important;
       align-items: flex-start !important;
@@ -145,7 +149,7 @@
       position: relative;
       background: #fff !important;
       font-size: 12px;
-      width: auto !important;
+      width: 100% !important;
       box-sizing: border-box;
     }
     .calendar-day.other-month {
@@ -209,6 +213,49 @@
     }
     .legend-item span {
       color: #4b5563;
+    }
+
+    /* 반응형 조정 */
+    @media (max-width: 768px) {
+      .calendar-day {
+        min-height: 60px !important;
+        padding: 4px !important;
+        font-size: 11px !important;
+      }
+      
+      .calendar-weekday {
+        padding: 8px 4px;
+        font-size: 12px;
+      }
+      
+      .calendar-day-number {
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+      
+      .cert-indicator,
+      .progress-indicator {
+        font-size: 8px;
+        padding: 1px 3px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .calendar-day {
+        min-height: 50px !important;
+        padding: 3px !important;
+        font-size: 10px !important;
+      }
+      
+      .calendar-weekday {
+        padding: 6px 2px;
+        font-size: 11px;
+      }
+      
+      .calendar-day-number {
+        font-size: 11px;
+        margin-bottom: 1px;
+      }
     }
   </style>
 </head>

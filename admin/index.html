@@ -6,6 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../assets/css/style.css">
   <style>
+
+    /* 달력 그리드 고정 */
+    .calendar-day.other-month {
+      background: #f9fafb !important;
+      color: #9ca3af !important;
+    }
+    .calendar-day.out-of-range {
+      background: #f3f4f6 !important;
+      color: #9ca3af !important;
+    }
+    .calendar-day.out-of-range .calendar-day-content {
+      opacity: 0.3;
+    }
+    .calendar-day.today {
+      background: #fef3c7 !important;
+      border-color: #f59e0b !important;
+    }
+    #calendarDays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    
     /* 달력 스타일 */
     .calendar-container {
       margin-top: 20px;

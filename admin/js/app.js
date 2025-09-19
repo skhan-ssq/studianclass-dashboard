@@ -756,10 +756,67 @@ function ensureChart(labels, data) {
   const ctx = document.getElementById('progressChart')?.getContext?.('2d');
   if (!ctx) return;
   if (chart) chart.destroy();
+  
   chart = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets: [{ label: '진도율', data, pointRadius: 2, tension: 0.2 }] },
-    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, min: 0, max: 100 } } }
+    data: { 
+      labels, 
+      datasets: [{
+        label: '진도율',
+        data,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      interaction: { 
+        mode: 'index', 
+        intersect: false 
+      }, 
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: '#ffffff',
+          bodyColor: '#ffffff',
+          cornerRadius: 8
+        }
+      },
+      scales: { 
+        x: {
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
+        y: { 
+          beginAtZero: true, 
+          min: 0, 
+          max: 100,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          },
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          }
+        }
+      }
+    }
   });
 }
 
